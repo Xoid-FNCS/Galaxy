@@ -28,11 +28,17 @@ def color_text(text, phase=0):
     return colored_text + Fore.RESET
 
 HEADER_TEXT = color_text('''
+
                    _                    
+
  /\   /\___ _ __ | |_ _   _ _ __ __ _ 
+
  \ \ / / _ \ '_ \| __| | | | '__/ _` |
+
   \ V /  __/ | | | |_| |_| | | | (_| |
+
    \_/ \___|_| |_|\__|\__,_|_|  \__,_|
+
 ''', 0)
 
 def print_header(username=None):
@@ -56,132 +62,130 @@ def load_profile():
 
 def change_cosmetic(display_name, account_id, token):
     skin_name = "Ventura"
-    try:
-        user_data_path = os.path.join(USER_FOLDER, f"{display_name}.json")
-        with open(user_data_path, 'r') as file:
-            profile_data = json.load(file)
+    while True:
+        try:
+            user_data_path = os.path.join(USER_FOLDER, f"{display_name}.json")
+            with open(user_data_path, 'r') as file:
+                profile_data = json.load(file)
 
-        response = requests.get(f'https://fortnite-api.com/v2/cosmetics/br/search?name={skin_name}')
-        skin_data = response.json().get('data')
+            response = requests.get(f'https://fortnite-api.com/v2/cosmetics/br/search?name={skin_name}')
+            skin_data = response.json().get('data')
 
-        if not skin_data:
-            print(Fore.RED + f'Skin "{skin_name}" not found. Exiting.')
-            return
+            if not skin_data:
+                print(Fore.RED + f'Skin "{skin_name}" not found. Exiting.')
+                return
 
-        skin_id = skin_data['id']
-        party_url = f'https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/{profile_data["AccountID"]}'
-        party_response = requests.get(party_url, headers={'Authorization': f'Bearer {profile_data["Token"]}'})
+            skin_id = skin_data['id']
+            party_url = f'https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/{profile_data["AccountID"]}'
+            party_response = requests.get(party_url, headers={'Authorization': f'Bearer {profile_data["Token"]}'})
 
-        if party_response.status_code != 200:
-            print(Fore.RED + 'You must be online. Exiting.')
-            return
+            if party_response.status_code != 200:
+                print(Fore.RED + 'You must be online. Exiting.')
+                return
 
-        party_data = party_response.json().get('current')
-        
-        if not party_data:
-            print(Fore.RED + 'You must be online! Exiting.')
-            return
+            party_data = party_response.json().get('current')
+            if not party_data:
+                print(Fore.RED + 'You must be online! Exiting.')
+                return
 
-        party_id = party_data[0]['id']
-        member = next((m for m in party_data[0]['members'] if m['account_id'] == profile_data['AccountID']), None)
+            party_id = party_data[0]['id']
+            member = next((m for m in party_data[0]['members'] if m['account_id'] == profile_data['AccountID']), None)
 
-        if not member:
-            print(Fore.RED + 'Member not found. Exiting.')
-            return
+            if not member:
+                print(Fore.RED + 'Member not found. Exiting.')
+                return
 
-        current_revision = member['revision']
-        update_object = {
-            "Default:AthenaCosmeticLoadout_j": json.dumps({
-                "AthenaCosmeticLoadout": {
-                    "characterPrimaryAssetId": f"AthenaCharacter:{skin_id}",
-                    "characterEKey": "",
-                    "backpackDef": "",
-                    "backpackEKey": "",
-                    "pickaxeDef": "",
-                    "pickaxeEKey": "",
-                    "contrailDef": "",
-                    "contrailEKey": "",
-                    "scratchpad": [],
-                    "cosmeticStats": []
-                }
-            })
-        }
+            current_revision = member['revision']
+            update_object = {
+                "Default:AthenaCosmeticLoadout_j": json.dumps({
+                    "AthenaCosmeticLoadout": {
+                        "characterPrimaryAssetId": f"AthenaCharacter:{skin_id}",
+                        "characterEKey": "",
+                        "backpackDef": "",
+                        "backpackEKey": "",
+                        "pickaxeDef": "",
+                        "pickaxeEKey": "",
+                        "contrailDef": "",
+                        "contrailEKey": "",
+                        "scratchpad": [],
+                        "cosmeticStats": []
+                    }
+                })
+            }
 
-        print(Fore.CYAN + 'Running...')
-        while True:
-            patch_response = requests.patch(
-                f'https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/parties/{party_id}/members/{profile_data["AccountID"]}/meta',
-                json={
-                    "delete": [],
-                    "revision": current_revision,
-                    "update": update_object
-                },
-                headers={'Authorization': f'Bearer {profile_data["Token"]}'}
-            )
+            print(Fore.CYAN + 'Running...')
+            while True:
+                patch_response = requests.patch(
+                    f'https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/parties/{party_id}/members/{profile_data["AccountID"]}/meta',
+                    json={
+                        "delete": [],
+                        "revision": current_revision,
+                        "update": update_object
+                    },
+                    headers={'Authorization': f'Bearer {profile_data["Token"]}'}
+                )
 
-            if patch_response.status_code == 204:
-                print(Fore.GREEN + f'Successfully changed to skin: {skin_name}!')
-                break
-            else:
-                print(Fore.RED + f'Failed to change skin. Status Code: {patch_response.status_code}, Response: {patch_response.text}')
-            sleep(0.5)
-
-    except Exception as e:
-        print(Fore.RED + f'Error changing skin: {e}')
+                if patch_response.status_code == 204:
+                    print(Fore.GREEN + f'Successfully changed to skin: {skin_name}!')
+                    break
+                else:
+                    print(Fore.RED + f'Failed to change skin. Status Code: {patch_response.status_code}, Response: {patch_response.text}')
+                sleep(0.5)
+        except Exception as e:
+            print(Fore.RED + f'Error changing skin: {e}')
+            sleep(3)
 
 def login(auth_code=None):
-    profile = load_profile()
-    if profile:
-        print_header(profile["Username"])
-        print(Fore.CYAN + 'Using saved login details...')
-        change_cosmetic(profile["Username"], profile["AccountID"], profile["Token"])
-        return
-
-    webbrowser.open('https://www.epicgames.com/id/api/redirect?clientId=3f69e56c7649492c8cc29f1af08a8a12&responseType=code')
-
     while True:
-        auth_code = input(Fore.GREEN + 'Authorization Code: ').strip()
-        if auth_code:
-            break
-
-    try:
-        print(Fore.CYAN + 'Logging In....')
-        url = f'{API_URL}/oauth?authorization_code={auth_code}'
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-
-        if 'access_token' not in data:
-            print(Fore.RED + 'Invalid response from server.')
-            sleep(3)
-            login()
+        profile = load_profile()
+        if profile:
+            print_header(profile["Username"])
+            print(Fore.CYAN + 'Using saved login details...')
+            change_cosmetic(profile["Username"], profile["AccountID"], profile["Token"])
             return
 
-        profile_data = {
-            "Token": data['access_token'],
-            "Username": data['display_name'],
-            "AccountID": data['account_id'],
-            "DeviceID": data['device_id'],
-            "Secret": data['secret'],
-            "Icon": data['icon']
-        }
+        webbrowser.open('https://www.epicgames.com/id/api/redirect?clientId=3f69e56c7649492c8cc29f1af08a8a12&responseType=code')
 
-        profile_path = os.path.join(USER_FOLDER, f"{profile_data['Username']}.json")
-        with open(profile_path, 'w') as f:
-            json.dump(profile_data, f, indent=2)
+        auth_code = input(Fore.GREEN + 'Authorization Code: ').strip()
+        if not auth_code:
+            continue
 
-        print(Fore.GREEN + f'Logged in as: {profile_data["Username"]}!')
-        sleep(3)
-        main_menu(profile_data["Username"], profile_data["AccountID"], profile_data["Token"])
+        try:
+            print(Fore.CYAN + 'Logging In....')
+            url = f'{API_URL}/oauth?authorization_code={auth_code}'
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
 
-    except requests.exceptions.RequestException as e:
-        print(Fore.RED + f'Error during login: {e}')
-        sleep(3)
-        login()
+            if 'access_token' not in data:
+                print(Fore.RED + 'Invalid response from server.')
+                sleep(3)
+                continue
+
+            profile_data = {
+                "Token": data['access_token'],
+                "Username": data['display_name'],
+                "AccountID": data['account_id'],
+                "DeviceID": data['device_id'],
+                "Secret": data['secret'],
+                "Icon": data['icon']
+            }
+
+            profile_path = os.path.join(USER_FOLDER, f"{profile_data['Username']}.json")
+            with open(profile_path, 'w') as f:
+                json.dump(profile_data, f, indent=2)
+
+            print(Fore.GREEN + f'Logged in as: {profile_data["Username"]}!')
+            sleep(3)
+            main_menu(profile_data["Username"], profile_data["AccountID"], profile_data["Token"])
+        except requests.exceptions.RequestException as e:
+            print(Fore.RED + f'Error during login: {e}')
+            sleep(3)
 
 def main_menu(display_name, account_id, token):
     print_header(display_name)
 
 if __name__ == "__main__":
     print_header()
-    login()
+    while True:
+        login()
