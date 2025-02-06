@@ -11,7 +11,7 @@
 ## How to Download and Use  
 
 ### 1. Download Galaxy  
-1. Visit the **[Galaxy GitHub page](https://github.com/Xoid-FNCS/Galaxy-Test/)**.  
+1. Visit the **[Galaxy GitHub page](https://github.com/Xoid-FNCS/Galaxy/)**.  
 2. Click the **Green "Code" Button**.  
 3. Select **"Download ZIP"**.  
 4. Extract the ZIP file to a folder on your computer.  
