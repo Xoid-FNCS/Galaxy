@@ -21,7 +21,7 @@
 2. Open **Command Prompt (CMD)** and run the following command to install the required modules:  
 
    ```sh
-   pip install requests colorama webbrowser
+   pip install requests colorama browser
    ```
 
 ### 3. Run the Program  
