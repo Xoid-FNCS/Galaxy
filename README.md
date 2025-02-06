@@ -1,6 +1,6 @@
 # Galaxy - Open Source Fortnite Skin Changer  
 
-![Galaxy Skin]([https://static.wikia.nocookie.net/fortnite/images/c/ce/Ventura_%28Featured%29_-_Outfit_-_Fortnite.png/revision/latest?cb=20200513152817](https://purepng.com/public/uploads/large/fortnite-new-galaxy-skin-gm0.png))  
+![Galaxy Skin]([https://static.wikia.nocookie.net/fortnite/images/c/ce/Ventura_%28Featured%29_-_Outfit_-_Fortnite.png))  
 
 ## About  
 **Galaxy** is an open-source Fortnite skin changer that allows you to appear as the **Galaxy** skin in the lobby.  
